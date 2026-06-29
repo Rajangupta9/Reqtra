@@ -189,9 +189,9 @@ export const AppProvider = ({ children }) => {
             const payload = prepareSingleRequestPayload(activeTabData);
             
             let selectedEnv = environments.find(env => env.id === selectedEnvId);
-            
 
-            if(selectedEnv===undefined){
+
+            if(selectedEnv===undefined && environments.length > 0){
                setSelectedEnvId(environments[0].id);
                selectedEnv = environments[0];
             }
@@ -200,7 +200,7 @@ export const AppProvider = ({ children }) => {
             
             const pm = buildPmSandbox({
                 environments : clonedEnvironments,
-                activeEnvName: selectedEnv.name,
+                activeEnvName: selectedEnv?.name || '',
                 globalStore: {},
                 response: null,
                 sendSubRequest: async (req, callback) => {
@@ -220,7 +220,7 @@ export const AppProvider = ({ children }) => {
             await updateEnvironmentIfChanged(environments, PreEnv, selectedWorkspace, setEnvironments, envController);
 
             const newPaylod = applyPreRequestModifications(payload, reqestchange)
-            const result = await Proxy(newPaylod, activeTabId, selectedEnvId);
+            const result = await Proxy(newPaylod, activeTabId, selectedEnv?.id || '');
             const duration = Date.now() - startTime;
 
 
@@ -287,7 +287,7 @@ export const AppProvider = ({ children }) => {
                 statusCode,
                 request: mapStateToApiRequest(activeTabData),
                 response: responseData,
-                duration: result?.timingInfo?.duration || `${duration}`,
+                duration: `${duration}`,
                 createdAt: Math.floor(Date.now() / 1000),
             }).catch(console.error);
         } finally {
