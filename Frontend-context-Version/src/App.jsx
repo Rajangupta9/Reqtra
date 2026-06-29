@@ -6,6 +6,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Auth } from './Page/Auth';
 import { AppProvider } from './ContextApi/AppContext';
 import FakerTextField from './Components/Dashboard/PlayGround/helper/FakerTextField';
+import LandingPage from './Components/LandingPage/LandingPage';
 
 const ProtectedRoutes = ({ children }) => {
   const isAuthenticated = localStorage.getItem('token') != null;
@@ -25,6 +26,10 @@ export const App = () => {
       <GoogleOAuthProvider clientId="1020480354420-ap37jpum6hgp7tvvm0e4mbtfjn9h0uq5.apps.googleusercontent.com">
         <Router>
           <Routes>
+            {/* Landing Page - default public route */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* Auth routes */}
             <Route
               path="/*"
               element={
@@ -34,22 +39,18 @@ export const App = () => {
               }
             />
 
+            {/* Dashboard - protected */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoutes>
                   <AppProvider>
-
                     <AppLayout />
-
                   </AppProvider>
-
                 </ProtectedRoutes>
               }
             />
-            <Route path="/random" element={<FakerTextField />} ></Route>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="/random" element={<FakerTextField />} />
           </Routes>
         </Router>
       </GoogleOAuthProvider>
