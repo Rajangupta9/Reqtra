@@ -1,0 +1,48 @@
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# Local/Development Tool configurations and caches
+.mcp.json
+.jetro/mcp-config.json
+.jetro/cache.duckdb
+.jetro/daemon/credentials.json
+.cursor/mcp.json
+
+# Go/Backend compiled binaries & test artifacts
+Backend/reqtra
+Backend/GoBackend
+Backend/vendor/
+Backend/.env
+Backend/*.exe
+Backend/*.test
+Backend/*.out
+
+# Node/Frontend dependencies & build artifacts
+Frontend-context-Version/node_modules/
+Frontend-context-Version/dist/
+Frontend-context-Version/dist-ssr/
+Frontend-context-Version/.env
+Frontend-context-Version/*.local
+Frontend-context-Version/npm-debug.log*
+Frontend-context-Version/yarn-debug.log*
+Frontend-context-Version/yarn-error.log*
+Frontend-context-Version/pnpm-debug.log*
+Frontend-context-Version/lerna-debug.log*

@@ -1,4 +1,9 @@
-vendor 
+vendor/
 GoBackend
+reqtra
 .env
-
+.env.*
+!.env.example
+*.exe
+*.test
+*.out
