@@ -8,13 +8,12 @@ import {
     TextField,
     Typography,
     CircularProgress,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
+    Tooltip,
+    IconButton,
+    alpha,
+    useTheme,
 } from "@mui/material";
-import {  SendOutlined, SaveOutlined, TableRowsOutlined } from "@mui/icons-material";
+import { SendRounded, SaveOutlined, TableRowsOutlined, KeyboardArrowDown } from "@mui/icons-material";
 import { useApp } from "../../../ContextApi/AppContext";
 import { useNotification } from "../../../ContextApi/NotificationContext";
 import { requestController } from "../../../Controller/request";
@@ -23,24 +22,19 @@ import { debounce } from "../../../utils/debounce";
 import EnvironmentDrawer from "./EnvironmentDrawer";
 import { getMethodColor } from "../../Common/getMethodColour";
 
-
-
 const API_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
 
 const RequestHeader = () => {
-
-    const { dispatch, sendRequest, activeTabData, 
-        selectedItem, activeTabId , renameDialogOpen} = useApp();
+    const theme = useTheme();
+    const { dispatch, sendRequest, activeTabData,
+        selectedItem, activeTabId, renameDialogOpen } = useApp();
     const { showNotification } = useNotification();
 
     const { method = "GET", url = "", loading = false } = activeTabData;
 
-
-    const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-    const [requestName, setRequestName] = useState("");
     const [envDrawerOpen, setEnvDrawerOpen] = useState(false);
     const [locUrl, setLocUrl] = useState("");
-   
+
     const mockEnvironments = [];
 
     const handleUrlChange = (event) => {
@@ -56,44 +50,20 @@ const RequestHeader = () => {
         });
     };
 
-    const handleOpenSaveDialog = () => {
-        setRequestName(activeTabData?.name || "");
-        setSaveDialogOpen(true);
-    };
-
-    const handleCloseSaveDialog = () => {
-        setSaveDialogOpen(false);
-        setRequestName("");
-    };
-
     const handleConfirmSave = async () => {
-
+        if (!selectedItem?.id) return;
         try {
-            const updatedData = { ...activeTabData };
-            const payload = mapStateToApiRequest(updatedData);
-             
-            console.log(updatedData)
-            console.log(payload)
-
-            await requestController.updateRequstwithId(selectedItem?.id, payload);
-            showNotification("Request updated successfully", "success");
+            const payload = mapStateToApiRequest({ ...activeTabData });
+            await requestController.updateRequstwithId(selectedItem.id, payload);
+            showNotification("Request saved!", "success");
         } catch (error) {
-            showNotification("Failed to update request", "error");
-        } finally {
-            handleCloseSaveDialog();
+            showNotification("Failed to save request", "error");
         }
     };
-
-
-
 
     useEffect(() => {
         setLocUrl(url || "");
     }, [url]);
-
-  
-
-
 
     const debouncedDispatch = useCallback(
         debounce((value) => {
@@ -102,183 +72,229 @@ const RequestHeader = () => {
         [dispatch, activeTabId]
     );
 
-useEffect(() => {
-    const handleKeyDown = async (e) => {
-        
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"  && !renameDialogOpen) {
-            
-            e.preventDefault();
-
-           
-            if (loading) return;
-
-          
-            if (selectedItem && activeTabData.id && selectedItem.id !== activeTabData.id) {
-                showNotification(
-                    "Save conflict: The selected request doesn't match the active tab.",
-                    "warning"
-                );
-                return; 
-            }
-
-            
-            if (selectedItem?.id) {
-                try {
-                    const payload = mapStateToApiRequest(activeTabData);
-                 
-                    await requestController.updateRequstwithId(selectedItem.id, payload);
-                    showNotification("Request saved!", "success");
-                } catch (error) {
-                    console.error("Quick save failed:", error);
-                    showNotification("Failed to save request", "error");
+    useEffect(() => {
+        const handleKeyDown = async (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && !renameDialogOpen) {
+                e.preventDefault();
+                if (loading) return;
+                if (selectedItem && activeTabData.id && selectedItem.id !== activeTabData.id) {
+                    showNotification("Save conflict: The selected request doesn't match the active tab.", "warning");
+                    return;
                 }
-            } else {
-      
-                handleOpenSaveDialog();
+                if (selectedItem?.id) {
+                    try {
+                        const payload = mapStateToApiRequest(activeTabData);
+                        await requestController.updateRequstwithId(selectedItem.id, payload);
+                        showNotification("Request saved!", "success");
+                    } catch (error) {
+                        showNotification("Failed to save request", "error");
+                    }
+                } else {
+                    showNotification("Select a request from the sidebar to save", "warning");
+                }
+            } else if (e.ctrlKey && e.key === 'Enter' && !renameDialogOpen) {
+                e.preventDefault();
+                if (!loading) sendRequest();
             }
-        }
-        else if(e.ctrlKey && e.key === 'Enter' && !renameDialogOpen) {
-            e.preventDefault();
-            if (!loading) {
-                sendRequest();
-            }
-        }
-    };
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [activeTabData, selectedItem, loading]);
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-        document.removeEventListener("keydown", handleKeyDown);
-    };
-   
-}, [activeTabData, selectedItem, loading]);
+    const methodColor = getMethodColor(method);
+    const canSave = !loading && !!selectedItem && selectedItem.id === activeTabData.id;
 
     return (
         <Box>
-
-
-            {/* Request Input Bar */}
-            <Box sx={{ display: "flex", mb: 2, alignItems: "center", gap: 1 }}>
-                <Box sx={{ display: "flex", width: "100%" }}>
-                    <FormControl sx={{ minWidth: 120 }}>
-                        <Select
-                            value={method}
-                            onChange={handleMethodChange}
-                            sx={{
-                                height: 44,
-                                borderRadius: "8px",
-                                borderTopRightRadius: 0,
-                                borderBottomRightRadius: 0,
-                            }}
-                            renderValue={(selected) => (
+            {/* URL Bar */}
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    mb: 1.5,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    backgroundColor: theme.palette.mode === 'dark' ? alpha('#000', 0.25) : '#fff',
+                    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                    '&:focus-within': {
+                        borderColor: theme.palette.primary.main,
+                        boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`,
+                    },
+                }}
+            >
+                {/* Method Selector */}
+                <FormControl sx={{ flexShrink: 0 }}>
+                    <Select
+                        value={method}
+                        onChange={handleMethodChange}
+                        variant="standard"
+                        disableUnderline
+                        IconComponent={KeyboardArrowDown}
+                        sx={{
+                            height: 40,
+                            pl: 1.5,
+                            pr: 0.5,
+                            minWidth: 90,
+                            '& .MuiSelect-select': {
+                                display: 'flex',
+                                alignItems: 'center',
+                                py: 0,
+                                pr: '24px !important',
+                                backgroundColor: 'transparent',
+                            },
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.text.disabled,
+                                fontSize: '16px',
+                                right: 4,
+                            },
+                            '&:before, &:after': { display: 'none' },
+                        }}
+                        renderValue={(selected) => (
+                            <Typography
+                                sx={{
+                                    fontWeight: 700,
+                                    fontSize: '12px',
+                                    letterSpacing: '0.06em',
+                                    color: methodColor,
+                                    fontFamily: '"Inter", monospace',
+                                    lineHeight: 1,
+                                }}
+                            >
+                                {selected}
+                            </Typography>
+                        )}
+                    >
+                        {API_METHODS.map((m) => (
+                            <MenuItem key={m} value={m}>
                                 <Typography
-                                    variant="caption"
                                     sx={{
-                                        display: "flex",
-                                        justifyContent: "center",
                                         fontWeight: 700,
-                                        fontSize: "12px",
-                                        px: "8px",
-                                        py: "3px",
-                                        borderRadius: "8px",
-                                        // bgcolor: `${getMethodColor(selected)}20`,
-                                        color: getMethodColor(selected),
-                                        textAlign: "center",
-                                        minWidth: 60,
+                                        fontSize: '12px',
+                                        letterSpacing: '0.06em',
+                                        color: getMethodColor(m),
+                                        fontFamily: '"Inter", monospace',
+                                        minWidth: 58,
                                     }}
                                 >
-                                    {selected}
+                                    {m}
                                 </Typography>
-                            )}
-                        >
-                            {API_METHODS.map((m) => (
-                                <MenuItem key={m} value={m}>
-                                    <Typography
-                                        variant="caption"
-                                        sx={{
-                                            display: "inline-block",
-                                            fontWeight: 600,
-                                            fontSize: "12px",
-                                            px: "8px",
-                                            py: "3px",
-                                            borderRadius: "8px",
-                                            // bgcolor: `${getMethodColor(m)}20`,
-                                            color: getMethodColor(m),
-                                            textAlign: "center",
-                                            minWidth: 60,
-                                        }}
-                                    >
-                                        {m}
-                                    </Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    <TextField
-                        value={locUrl}
-                        onChange={handleUrlChange}
-                        placeholder="Enter request URL"
-                        fullWidth
-                        sx={{
-                            "& .MuiOutlinedInput-root": {
-                                height: 44,
-                                borderTopLeftRadius: 0,
-                                borderBottomLeftRadius: 0,
+                {/* Separator */}
+                <Box sx={{ width: '1px', height: 20, backgroundColor: theme.palette.divider, flexShrink: 0 }} />
+
+                {/* URL Input */}
+                <TextField
+                    value={locUrl}
+                    onChange={handleUrlChange}
+                    placeholder="Enter request URL or paste cURL"
+                    fullWidth
+                    variant="standard"
+                    InputProps={{ disableUnderline: true }}
+                    sx={{
+                        '& .MuiInputBase-root': {
+                            height: 40,
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            boxShadow: 'none',
+                            '&:hover': {
+                                backgroundColor: 'transparent',
+                                border: 'none',
                             },
-                        }}
-                    />
-                </Box>
+                            '&.Mui-focused': {
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                boxShadow: 'none',
+                            },
+                        },
+                        '& .MuiInputBase-input': {
+                            fontFamily: '"SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace',
+                            fontSize: '13px',
+                            color: theme.palette.text.primary,
+                            px: 1,
+                            py: 0,
+                            '&::placeholder': {
+                                color: theme.palette.text.disabled,
+                                fontFamily: '"Inter", sans-serif',
+                            },
+                        },
+                    }}
+                />
 
+                {/* Action icons inside URL bar */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, pr: 1, flexShrink: 0 }}>
+                    <Tooltip title={canSave ? "Save (Ctrl+S)" : "Select a collection item to save"} arrow>
+                        <span>
+                            <IconButton
+                                size="small"
+                                onClick={handleConfirmSave}
+                                disabled={!canSave}
+                                sx={{
+                                    width: 28,
+                                    height: 28,
+                                    color: canSave ? theme.palette.text.secondary : theme.palette.text.disabled,
+                                    '&:hover': { color: theme.palette.primary.main, backgroundColor: alpha(theme.palette.primary.main, 0.08) },
+                                }}
+                            >
+                                <SaveOutlined sx={{ fontSize: 15 }} />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </Box>
+            </Box>
+
+            {/* Send Button row */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                 <Button
                     onClick={sendRequest}
                     disabled={loading || !url.trim()}
                     variant="contained"
-                    sx={{ height: 44, px: 3, fontWeight: 600, borderRadius: "8px" }}
-                    startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SendOutlined />}
-                >
-                    {loading ? "Sending..." : "Send"}
-                </Button>
-            </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<SaveOutlined />}
-                    onClick={handleConfirmSave}
-                    disabled={!url.trim() || !selectedItem || selectedItem.id !== activeTabData.id}
                     sx={{
-                        bgcolor: "background.paper",
-                        boxShadow: "none",
-                        color: "text.primary",
-                        "&:hover": { bgcolor: "action.hover" },
+                        height: 34,
+                        px: 2.5,
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        borderRadius: '6px',
+                        gap: 0.8,
+                        flexShrink: 0,
                     }}
+                    startIcon={
+                        loading
+                            ? <CircularProgress size={13} color="inherit" thickness={3} />
+                            : <SendRounded sx={{ fontSize: '14px !important' }} />
+                    }
                 >
-                    Save
-                    
+                    {loading ? "Sending…" : "Send"}
                 </Button>
 
-
-                <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<TableRowsOutlined />}
-                    onClick={() => setEnvDrawerOpen(true)}
-                    sx={{
-                        bgcolor: "background.paper",
-                        boxShadow: "none",
-                        color: "text.primary",
-                        "&:hover": { bgcolor: "action.hover" },
-                    }}
-                >
-                    Env
-                </Button>
+                <Tooltip title="Manage environments" arrow>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<TableRowsOutlined sx={{ fontSize: '14px !important' }} />}
+                        onClick={() => setEnvDrawerOpen(true)}
+                        sx={{
+                            height: 34,
+                            px: 1.5,
+                            fontSize: '12px',
+                            color: theme.palette.text.secondary,
+                            borderColor: theme.palette.divider,
+                            '&:hover': {
+                                borderColor: theme.palette.primary.main,
+                                color: theme.palette.primary.main,
+                                backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                            },
+                        }}
+                    >
+                        Environments
+                    </Button>
+                </Tooltip>
             </Box>
-
-
-          
-           
 
             <EnvironmentDrawer
                 open={envDrawerOpen}

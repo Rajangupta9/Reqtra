@@ -78,10 +78,8 @@ export const CreateDialog = ({
             maxWidth="sm" 
             fullWidth
             slotProps={{
-                paper:{
-                    sx : {
-                        borderRadius: 2
-                    }
+                paper: {
+                    sx: { borderRadius: '10px' }
                 }
             }}
             
@@ -102,7 +100,9 @@ export const CreateDialog = ({
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         fullWidth
+                        size="small"
                         required
+                        autoFocus
                         error={!!errors.name}
                         helperText={errors.name}
                         placeholder={type === 'collection' ? 'e.g., User Authentication' : 'e.g., Login User'}
@@ -145,6 +145,7 @@ export const CreateDialog = ({
                         value={formData.description}
                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                         fullWidth
+                        size="small"
                         multiline
                         rows={3}
                         placeholder={`Describe this ${type}...`}

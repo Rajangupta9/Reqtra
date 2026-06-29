@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import { Box, IconButton, Tooltip, useTheme } from '@mui/material';
+import { Box, IconButton, Tooltip, useTheme, alpha } from '@mui/material';
 import TopicOutlinedIcon from '@mui/icons-material/TopicOutlined';
 import HistoryIcon from '@mui/icons-material/History';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import { DataObjectRounded, DynamicFeed, TableRowsOutlined } from '@mui/icons-material';
+import { TableRowsOutlined } from '@mui/icons-material';
 import { ThemeToggleButton } from '../../Theme/ThemeToggleButton';
-
 
 export const PostmanStyleSidebar = ({ onViewChange }) => {
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [activeView, setActiveView] = useState('collections');
 
   const handleIconClick = (viewName) => {
     setActiveView(viewName);
-    if (onViewChange) {
-      onViewChange(viewName);
-    }
+    if (onViewChange) onViewChange(viewName);
   };
 
   const navItems = [
@@ -24,14 +21,8 @@ export const PostmanStyleSidebar = ({ onViewChange }) => {
     { name: 'history', label: 'History', icon: HistoryIcon },
   ];
 
-  const bottomNavItems = [
-    // { name: 'Switch Theme', label: "Theme" , icon: DynamicFeed},
-    // { name: 'settings', label: 'Settings', icon: SettingsOutlinedIcon },
-  ];
-
   const NavButton = ({ item }) => {
     const isActive = activeView === item.name;
-    const color = isActive ? theme.palette.primary.main : theme.palette.text.secondary;
     const IconComponent = item.icon;
 
     return (
@@ -39,26 +30,21 @@ export const PostmanStyleSidebar = ({ onViewChange }) => {
         <IconButton
           onClick={() => handleIconClick(item.name)}
           sx={{
-            position: 'relative',
-            width: 48,
-            height: 48,
-            borderRadius: '10px',
-            color: color,
-            '&::before': { 
-              content: '""',
-              position: 'absolute',
-              left: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '4px',
-              height: isActive ? '24px' : '0px',
-              backgroundColor: theme.palette.primary.main,
-              borderRadius: '0 4px 4px 0',
-              transition: 'height 0.2s ease-in-out',
-            },
+            width: 36,
+            height: 36,
+            borderRadius: '8px',
+            color: isActive ? theme.palette.primary.main : theme.palette.text.secondary,
+            backgroundColor: isActive
+              ? alpha(theme.palette.primary.main, isDark ? 0.14 : 0.09)
+              : 'transparent',
+            transition: 'all 0.15s ease',
             '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-            }
+              color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+              backgroundColor: isActive
+                ? alpha(theme.palette.primary.main, isDark ? 0.18 : 0.12)
+                : theme.palette.action.hover,
+            },
+            '& .MuiSvgIcon-root': { fontSize: 18 },
           }}
         >
           <IconComponent />
@@ -67,34 +53,33 @@ export const PostmanStyleSidebar = ({ onViewChange }) => {
     );
   };
 
-
   return (
     <Box
       sx={{
-        width: 60,
+        width: 52,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '8px 0',
+        py: 1.5,
+        px: '8px',
         backgroundColor: theme.palette.background.paper,
         borderRight: `1px solid ${theme.palette.divider}`,
         flexShrink: 0,
       }}
     >
-      {/* Top Icons */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {navItems.map((item) => <NavButton key={item.name} item={item} />)}
+      {/* Top nav */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        {navItems.map((item) => (
+          <NavButton key={item.name} item={item} />
+        ))}
       </Box>
 
-      {/* Bottom Icons */}
-      
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      {/* Bottom: theme toggle */}
+      <Box>
         <ThemeToggleButton />
-       {bottomNavItems.map((item) => <NavButton key={item.name} item={item} />)}
       </Box>
     </Box>
   );
 };
-

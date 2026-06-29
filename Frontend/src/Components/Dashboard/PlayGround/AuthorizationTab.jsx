@@ -6,8 +6,6 @@ import {
   Select,
   MenuItem,
   TextField,
-  Card,
-  CardContent,
   InputLabel,
   InputAdornment,
   IconButton,
@@ -49,20 +47,16 @@ const SensitiveTextField = memo(({ label, value, onChange, ...props }) => {
 const NoAuth = memo(() => (
   <Box
     sx={{
-      mt: 2,
-      p: 3,
-      textAlign: "center",
-      color: "text.secondary",
+      mt: 2.5,
+      py: 2,
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
+      gap: 1.5,
+      color: "text.secondary",
     }}
   >
-    <LockOutlined sx={{ fontSize: 40, mb: 1 }} />
-    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-      No Authentication
-    </Typography>
-    <Typography variant="body2">
+    <LockOutlined sx={{ fontSize: 18, flexShrink: 0 }} />
+    <Typography variant="body2" color="text.secondary">
       This request will be sent without any authorization credentials.
     </Typography>
   </Box>
@@ -77,6 +71,7 @@ const BearerTokenAuth = memo(({ data, onChange }) => (
       fullWidth
       multiline
       rows={3}
+      size="small"
       placeholder="Enter bearer token"
       sx={{ wordBreak: "break-all" }}
     />
@@ -90,12 +85,14 @@ const BasicAuth = memo(({ data, onChange }) => (
       value={data.basicAuth?.username || ""}
       onChange={(e) => onChange("basicAuth.username", e.target.value)}
       fullWidth
+      size="small"
       placeholder="Enter username"
     />
     <SensitiveTextField
       label="Password"
       value={data.basicAuth?.password || ""}
       onChange={(e) => onChange("basicAuth.password", e.target.value)}
+      size="small"
       placeholder="Enter password"
     />
   </Box>
@@ -109,16 +106,18 @@ const ApiKeyAuth = memo(({ data, onChange }) => (
         value={data.apiKey?.key || ""}
         onChange={(e) => onChange("apiKey.key", e.target.value)}
         fullWidth
+        size="small"
         placeholder="e.g., X-API-Key"
       />
       <SensitiveTextField
         label="Value"
         value={data.apiKey?.value || ""}
         onChange={(e) => onChange("apiKey.value", e.target.value)}
+        size="small"
         placeholder="Enter API key"
       />
     </Box>
-    <FormControl fullWidth>
+    <FormControl fullWidth size="small">
       <InputLabel>Add to</InputLabel>
       <Select
         value={data.apiKey?.addTo || "header"}
@@ -190,27 +189,17 @@ const AuthorizationTab = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-        Authorization
-      </Typography>
+    <Box sx={{ maxWidth: 520 }}>
+      <FormControl size="small" sx={{ minWidth: 200, mb: 0.5 }}>
+        <InputLabel sx={{ fontSize: '13px' }}>Auth type</InputLabel>
+        <Select value={authType} onChange={handleAuthTypeChange} label="Auth type" sx={{ fontSize: '13px' }}>
+          {AUTH_TYPES.map((type) => (
+            <MenuItem key={type} value={type}>{type}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-      <Card elevation={0} sx={{ border: 1, borderColor: "divider" }}>
-        <CardContent>
-          <FormControl fullWidth>
-            <InputLabel>Type</InputLabel>
-            <Select value={authType} onChange={handleAuthTypeChange} label="Type">
-              {AUTH_TYPES.map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {renderAuthForm()}
-        </CardContent>
-      </Card>
+      {renderAuthForm()}
     </Box>
   );
 };

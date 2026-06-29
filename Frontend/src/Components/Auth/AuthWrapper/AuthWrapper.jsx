@@ -27,8 +27,8 @@ export const AuthWrapper = ({children}) =>{
                             right: 0,
                             bottom: 0,
                             background: (theme) => theme.palette.mode === 'dark'
-                                ? 'radial-gradient(circle at 30% 20%, rgba(13, 110, 253, 0.1) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(139, 69, 255, 0.08) 0%, transparent 50%)'
-                                : 'radial-gradient(circle at 30% 20%, rgba(13, 110, 253, 0.06) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(139, 69, 255, 0.04) 0%, transparent 50%)',
+                                ? 'radial-gradient(circle at 30% 20%, rgba(79,142,247,0.12) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(139,92,246,0.09) 0%, transparent 50%)'
+                                : 'radial-gradient(circle at 30% 20%, rgba(9,105,218,0.07) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(124,58,237,0.05) 0%, transparent 50%)',
                             pointerEvents: 'none',
                         }
                     }}>

@@ -6,17 +6,16 @@ import {
     IconButton,
     Menu,
     MenuItem,
-    Tooltip
+    Tooltip,
+    alpha,
+    useTheme,
 } from '@mui/material';
 import {
     Add,
     Search,
     FolderOutlined,
-    PostAdd,
     Clear
 } from '@mui/icons-material';
-import {  useApp } from '../../ContextApi/AppContext';
-import { ActionTypes } from '../../ContextApi/helper/actionTypes';
 
 
 export const SearchBar = ({
@@ -27,8 +26,7 @@ export const SearchBar = ({
     disabled
 }) => {
     const [createMenuAnchor, setCreateMenuAnchor] = useState(null);
-
-    const {state , dispatch} = useApp()
+    const theme = useTheme();
 
     const handleCreateClick = (event) => {
         setCreateMenuAnchor(event.currentTarget);
@@ -73,7 +71,8 @@ export const SearchBar = ({
                                     borderColor: 'divider',
                                     '&:hover': {
                                         borderColor: 'primary.main',
-                                        backgroundColor: 'primary.50'
+                                        color: 'primary.main',
+                                        backgroundColor: alpha(theme.palette.primary.main, 0.06),
                                     }
                                 }}
                             >

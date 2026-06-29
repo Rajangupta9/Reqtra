@@ -155,11 +155,11 @@ export const CollectionTreeItem = React.memo((props) => {
                                 variant="body2"
                                 sx={{
                                     fontSize: '13px',
-                                    fontWeight: isFolder ? 550 : 450,
+                                    fontWeight: isFolder ? 500 : 400,
                                     color: isActuallySelectedItem ? 'selected' : 'text.primary',
-                                    TextOverflow: 'ellipsis',
-                                    overflow: "hidden",
-                                    whiteSpace: 'nowrap'
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden',
+                                    whiteSpace: 'nowrap',
                                 }}
                             >
                                 {isFolder ? item.name : item.request?.name}
@@ -167,7 +167,18 @@ export const CollectionTreeItem = React.memo((props) => {
                         }
                     />
                     <Tooltip title="More actions" placement="top">
-                        <IconButton size="small" onClick={handleMenuClick} sx={{ p: 0.25, opacity: 0.6, '&:hover': { opacity: 1 } }}>
+                        <IconButton
+                            size="small"
+                            onClick={handleMenuClick}
+                            sx={{
+                                p: 0.25,
+                                opacity: 0,
+                                flexShrink: 0,
+                                transition: 'opacity 0.15s ease',
+                                '.MuiListItemButton-root:hover &': { opacity: 0.6 },
+                                '&:hover': { opacity: '1 !important' },
+                            }}
+                        >
                             <MoreVert fontSize="small" />
                         </IconButton>
                     </Tooltip>

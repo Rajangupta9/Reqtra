@@ -1,5 +1,6 @@
-import React, { useState, useEffect, use } from 'react';
-import { Box, Typography, alpha, Snackbar, Alert, } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, alpha, Snackbar, Alert } from '@mui/material';
+import { WorkspacesOutlined } from '@mui/icons-material';
 import { SearchBar } from './SerachBar.jsx';
 import { CollectionTree } from './Collectiontree.jsx';
 import { CreateDialog } from './CreateDialog.jsx';
@@ -133,7 +134,6 @@ export const CollectionsSidebar = ({ onItemSelect }) => {
     const filteredCollections = collections.filter(c =>
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    console.log(collections)
     useEffect(() => {
         if (selectedWorkspace) {
             loadTopLevelCollections(selectedWorkspace.id);
@@ -575,15 +575,24 @@ export const CollectionsSidebar = ({ onItemSelect }) => {
                 ) : (
                     <Box
                         sx={{
-                            flexGrow: 1, p: 2, display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', justifyContent: 'center', textAlign: 'center'
+                            flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                            gap: 1.5,
                         }}
                     >
-                        <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                            Welcome to API Explorer
+                        <Box sx={{
+                            width: 48, height: 48, borderRadius: '10px', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center',
+                            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                            color: 'primary.main', mb: 0.5,
+                        }}>
+                            <WorkspacesOutlined sx={{ fontSize: 22 }} />
+                        </Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                            No workspace selected
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Select a workspace to manage collections
+                        <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                            Choose a workspace from the top bar to browse collections
                         </Typography>
                     </Box>
                 )}

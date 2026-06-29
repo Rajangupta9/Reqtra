@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Tabs, Tab } from '@mui/material';
+import { Box, Tabs, Tab, alpha, useTheme } from '@mui/material';
 import { useApp } from '../../../ContextApi/AppContext';
 import ParamsTab from './ParamsTab';
 import AuthorizationTab from './AuthorizationTab';
@@ -17,14 +17,18 @@ const TabPanel = ({ children, value, index, ...other }) => (
     aria-labelledby={`request-tab-${index}`}
     {...other}
   >
-    {value === index && <Box sx={{ minHeight: '300px' }}>{children}</Box>}
+    {value === index && (
+      <Box sx={{ pt: 2 }}>{children}</Box>
+    )}
   </div>
 );
 
 const RequestTabs = () => {
-  const tabs = [
+  const theme = useTheme();
+
+  const tabDefs = [
     { label: 'Params', key: 'params', component: <ParamsTab /> },
-    { label: 'Authorization', key: 'authorization', component: <AuthorizationTab /> },
+    { label: 'Auth', key: 'authorization', component: <AuthorizationTab /> },
     { label: 'Headers', key: 'headers', component: <HeadersTab /> },
     { label: 'Body', key: 'body', component: <BodyTab /> },
     { label: 'Scripts', key: 'scripts', component: <ScriptsTab /> },
@@ -32,14 +36,12 @@ const RequestTabs = () => {
   ];
 
   const { activeTabData, dispatch, activeTabId } = useApp();
-  const { activeRequestTab = 0 , method } = activeTabData;
+  const { activeRequestTab = 0, method } = activeTabData;
 
- 
-  //  Automatically switch to Body tab if method supports body
   useEffect(() => {
     const methodsWithBody = ['POST', 'PUT', 'PATCH'];
     if (methodsWithBody.includes(method)) {
-      const bodyTabIndex = tabs.findIndex(tab => tab.label === 'Body');
+      const bodyTabIndex = tabDefs.findIndex(tab => tab.label === 'Body');
       if (bodyTabIndex !== -1 && activeRequestTab !== bodyTabIndex) {
         dispatch({
           type: ActionTypes.SET_REQUEST_ACTIVE_TAB,
@@ -47,10 +49,7 @@ const RequestTabs = () => {
         });
       }
     }
-   
-  
   }, [activeTabData.id]);
-
 
   const handleTabChange = (event, newValue) => {
     dispatch({
@@ -59,89 +58,81 @@ const RequestTabs = () => {
     });
   };
 
-
   const hasTabData = (key) => {
     if (!activeTabData) return false;
-
     switch (key) {
       case 'params':
         return Array.isArray(activeTabData.params) && activeTabData.params.some(p => p.key && p.enabled);
-
-      case 'authorization':
+      case 'authorization': {
         const { authType, authData } = activeTabData;
         if (authType === 'No Auth') return false;
         if (authType === 'API Key') return authData?.apiKey?.key || authData?.apiKey?.value;
         if (authType === 'Bearer Token') return !!authData?.bearerToken;
         if (authType === 'Basic Auth') return authData?.basicAuth?.username || authData?.basicAuth?.password;
         return false;
-
+      }
       case 'headers':
         return Array.isArray(activeTabData.headers) && activeTabData.headers.some(h => h.key && h.enabled);
-
-      case 'body':
+      case 'body': {
         const { bodyType, formData, rawBody, urlEncodedData } = activeTabData;
-        if (bodyType === 'formdata')
-          return Array.isArray(formData) && formData.some(f => f.key && f.enabled && f.value);
-        if (bodyType === 'urlencoded')
-          return Array.isArray(urlEncodedData) && urlEncodedData.some(u => u.key && u.enabled && u.value);
-        if (bodyType === 'raw')
-          return rawBody && rawBody.trim() !== '{}' && rawBody.trim() !== '';
+        if (bodyType === 'formdata') return Array.isArray(formData) && formData.some(f => f.key && f.enabled && f.value);
+        if (bodyType === 'urlencoded') return Array.isArray(urlEncodedData) && urlEncodedData.some(u => u.key && u.enabled && u.value);
+        if (bodyType === 'raw') return rawBody && rawBody.trim() !== '{}' && rawBody.trim() !== '';
         return false;
-
-    
-       case 'scripts':
+      }
+      case 'scripts': {
         const hasPreRequestScript = activeTabData.preRequestScript && activeTabData.preRequestScript.trim() !== '';
         const hasTestScript = activeTabData.testScript && activeTabData.testScript.trim() !== '';
         return hasPreRequestScript || hasTestScript;
-
-      case 'settings':
-        // Show dot only if user changed settings from default
+      }
+      case 'settings': {
         const s = activeTabData.settings;
         if (!s) return false;
-        return (
-          s.followRedirects !== true ||
-          s.validateSSL !== true ||
-          s.timeout !== 30000 ||
-          s.maxRedirects !== 5
-        );
-
+        return s.followRedirects !== true || s.validateSSL !== true || s.timeout !== 30000 || s.maxRedirects !== 5;
+      }
       default:
         return false;
     }
   };
 
   return (
-    <Box >
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+    <Box>
+      <Box
+        sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        }}
+      >
         <Tabs
           value={activeRequestTab}
           onChange={handleTabChange}
           aria-label="Request Options Tabs"
           sx={{
+            minHeight: 38,
             '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 500,
-              minWidth: 'auto',
-              px: 2.5,
-              position: 'relative',
+              minHeight: 38,
+              px: 1.75,
+              py: 0,
             },
           }}
         >
-          {tabs.map((tab, index) => {
+          {tabDefs.map((tab, index) => {
             const showDot = hasTabData(tab.key);
+            const isActive = activeRequestTab === index;
             return (
               <Tab
                 key={tab.label}
+                disableRipple
                 label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 , fontSize: "1rem"}}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
                     {tab.label}
                     {showDot && (
                       <Box
                         sx={{
-                          width: 6,
-                          height: 6,
+                          width: 5,
+                          height: 5,
                           borderRadius: '50%',
-                          bgcolor: 'primary.main',
+                          bgcolor: isActive ? 'primary.main' : alpha(theme.palette.primary.main, 0.6),
+                          flexShrink: 0,
                         }}
                       />
                     )}
@@ -155,8 +146,8 @@ const RequestTabs = () => {
         </Tabs>
       </Box>
 
-      {tabs.map((tab, index) => (
-        <TabPanel key={tab.label} value={activeRequestTab} index={index} >
+      {tabDefs.map((tab, index) => (
+        <TabPanel key={tab.label} value={activeRequestTab} index={index}>
           {tab.component}
         </TabPanel>
       ))}

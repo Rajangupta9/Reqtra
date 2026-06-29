@@ -159,8 +159,8 @@ export const WorkspaceSelector = ({ onWorkspaceSelect, selectedWorkspace }) => {
                     disabled={loading}
                     sx={{
                         justifyContent: "space-between",
-                        textTransform: "none", fontSize: "14px", fontWeight: 500,
-                        color: "text.primary", borderRadius: '4px',
+                        textTransform: "none", fontSize: "13px", fontWeight: 500,
+                        color: "text.primary", borderRadius: '6px',
                         background: (theme) => theme.palette.mode === "dark"
                             ? alpha(theme.palette.primary.main, 0.08)
                             : alpha(theme.palette.primary.main, 0.06),

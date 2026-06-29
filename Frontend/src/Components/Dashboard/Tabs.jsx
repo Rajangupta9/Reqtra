@@ -13,34 +13,35 @@ import {
 import { tabsClasses } from "@mui/material/Tabs";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import { Public, PublicOutlined, TableRowsOutlined } from "@mui/icons-material";
+import { TableRowsOutlined } from "@mui/icons-material";
 import { useApp } from "../../ContextApi/AppContext";
 import EnvironmentDrawer from "./PlayGround/EnvironmentDrawer";
 import { getMethodColor } from "../Common/getMethodColour";
 
 export default function PostmanLikeTabs() {
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [envDrawerOpen, setEnvDrawerOpen] = useState(false);
   const { tabs, activeTabId, handleTabChange, addTab, closeTab, closeAllTabs } = useApp();
 
   const tabList = Object.values(tabs || []);
 
   const renderMethodBadge = (method) => (
-    <Typography
-      variant="caption"
+    <Box
+      component="span"
       sx={{
-        fontWeight: 600,
-        fontSize: "10px",
-        px: "5px",
-        py: "2px",
-        borderRadius: "4px",
+        fontWeight: 700,
+        fontSize: '10px',
+        letterSpacing: '0.04em',
+        lineHeight: 1,
         color: getMethodColor(method),
-        bgcolor: alpha(getMethodColor(method), 0.15),
-        textTransform: "uppercase",
+        fontFamily: '"Inter", monospace',
+        flexShrink: 0,
+        minWidth: 28,
       }}
     >
       {method || "GET"}
-    </Typography>
+    </Box>
   );
 
   return (
@@ -48,14 +49,14 @@ export default function PostmanLikeTabs() {
       sx={{
         display: "flex",
         alignItems: "center",
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-        bgcolor: theme.palette.background.paper,
-        height: 50,
-        gap: 1,
-        pr: 2,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        bgcolor: "background.paper",
+        height: 44,
+        gap: 0.5,
+        pr: 1,
       }}
     >
-      {/* Tabs */}
+      {/* Scrollable Tabs */}
       <Tabs
         value={activeTabId || false}
         onChange={handleTabChange}
@@ -63,27 +64,32 @@ export default function PostmanLikeTabs() {
         scrollButtons="auto"
         allowScrollButtonsMobile
         sx={{
-          
           flexGrow: 1,
-          minHeight: "100%",
+          minHeight: 44,
+          height: 44,
           [`& .${tabsClasses.indicator}`]: {
-            height: "3px",
-            borderRadius: "2px 2px 0 0",
+            height: 2,
+            borderRadius: '2px 2px 0 0',
             backgroundColor: theme.palette.primary.main,
+          },
+          [`& .${tabsClasses.scrollButtons}`]: {
+            width: 28,
+            '&.Mui-disabled': { opacity: 0.2 },
           },
         }}
       >
-        {tabList.map((tab, index) => (
+        {tabList.map((tab) => (
           <Tab
             key={tab.id}
             value={tab.id}
             component="div"
+            disableRipple
             label={
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 0.75,
                   width: "100%",
                   overflow: "hidden",
                 }}
@@ -96,104 +102,129 @@ export default function PostmanLikeTabs() {
                     flex: 1,
                     color: "inherit",
                     fontWeight: 500,
-                    fontSize: "13px",
+                    fontSize: "12px",
+                    lineHeight: 1.3,
                   }}
                 >
                   {tab.name || "Untitled"}
                 </Typography>
-                <Tooltip title="Close Tab" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(e, tab.id);
-                    }}
-                    sx={{
-                      p: "2px",
-                      opacity: 0.5,
-                      "&:hover": {
-                        opacity: 1,
-                        bgcolor: alpha(theme.palette.text.primary, 0.08),
-                      },
-                    }}
-                  >
-                    <CloseIcon sx={{ fontSize: "1rem" }} />
-                  </IconButton>
-                </Tooltip>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeTab(e, tab.id);
+                  }}
+                  sx={{
+                    p: '2px',
+                    ml: 0.25,
+                    flexShrink: 0,
+                    opacity: 0,
+                    width: 16,
+                    height: 16,
+                    borderRadius: '3px',
+                    '.MuiTab-root:hover &': { opacity: 0.5 },
+                    '.Mui-selected &': { opacity: 0.4 },
+                    '&:hover': {
+                      opacity: '1 !important',
+                      bgcolor: alpha(theme.palette.text.primary, 0.1),
+                    },
+                    '& .MuiSvgIcon-root': { fontSize: '11px' },
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
               </Box>
             }
             sx={{
               textTransform: "none",
-              minWidth: 160,
-              maxWidth: 160,
-              height: "100%",
-              // borderRight: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-              borderBottom: "3px solid transparent",
+              minWidth: 140,
+              maxWidth: 180,
+              height: 44,
+              minHeight: 44,
+              px: 1.5,
               fontWeight: 500,
               color: theme.palette.text.secondary,
+              borderRight: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+              transition: 'background-color 0.15s ease, color 0.15s ease',
               "&.Mui-selected": {
-                color: theme.palette.primary.main,
-                borderBottomColor: theme.palette.primary.main,
-                bgcolor: alpha(theme.palette.primary.main, 0.05),
+                color: theme.palette.text.primary,
+                bgcolor: alpha(theme.palette.primary.main, isDark ? 0.06 : 0.04),
               },
               "&:hover": {
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
+                bgcolor: theme.palette.action.hover,
+                color: theme.palette.text.primary,
               },
             }}
           />
         ))}
       </Tabs>
 
-      {/* Environment Button */}
-      <Button
-        size="small"
-        startIcon={<TableRowsOutlined fontSize="small" />}
-        onClick={() => setEnvDrawerOpen(true)}
-        sx={{
-          textTransform: "none",
-          fontWeight: 500,
-          fontSize: "13px",
-          borderRadius: "6px",
-          px: 1.5,
-          height: 32,
-          color: theme.palette.text.primary,
-          border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-          "&:hover": {
-            bgcolor: alpha(theme.palette.primary.main, 0.1),
-          },
-        }}
-      >
-        Env
-      </Button>
-
-      {/* Add Tab */}
-      <Tooltip title="New Tab" arrow>
+      {/* New Tab */}
+      <Tooltip title="New tab" arrow>
         <IconButton
           onClick={addTab}
+          size="small"
           sx={{
-            mx: 0.5,
-            borderRadius: "6px",
-            "&:hover": {
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
+            width: 28,
+            height: 28,
+            borderRadius: '6px',
+            color: theme.palette.text.secondary,
+            '&:hover': {
+              bgcolor: theme.palette.action.hover,
+              color: theme.palette.text.primary,
             },
           }}
         >
-          <AddIcon fontSize="small" />
+          <AddIcon sx={{ fontSize: 16 }} />
         </IconButton>
       </Tooltip>
 
-      {/* Close All Tabs */}
-      <Tooltip title="Close All Tabs" arrow>
-        <IconButton
-          onClick={closeAllTabs}
+      {/* Separator */}
+      <Box sx={{ width: '1px', height: 18, bgcolor: theme.palette.divider, mx: 0.5, flexShrink: 0 }} />
+
+      {/* Environment Button */}
+      <Tooltip title="Manage environments" arrow>
+        <Button
+          size="small"
+          startIcon={<TableRowsOutlined sx={{ fontSize: '14px !important' }} />}
+          onClick={() => setEnvDrawerOpen(true)}
           sx={{
-            borderRadius: "6px",
-            "&:hover": {
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
+            textTransform: "none",
+            fontWeight: 500,
+            fontSize: "12px",
+            borderRadius: "5px",
+            px: 1.25,
+            height: 28,
+            color: theme.palette.text.secondary,
+            border: `1px solid transparent`,
+            '&:hover': {
+              bgcolor: theme.palette.action.hover,
+              color: theme.palette.text.primary,
+              borderColor: theme.palette.divider,
             },
           }}
         >
-          <CloseIcon fontSize="small" />
+          Env
+        </Button>
+      </Tooltip>
+
+      {/* Close All */}
+      <Tooltip title="Close all tabs" arrow>
+        <IconButton
+          onClick={closeAllTabs}
+          size="small"
+          sx={{
+            width: 28,
+            height: 28,
+            borderRadius: '6px',
+            color: theme.palette.text.secondary,
+            '&:hover': {
+              bgcolor: alpha(theme.palette.error.main, 0.08),
+              color: theme.palette.error.main,
+            },
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 14 }} />
         </IconButton>
       </Tooltip>
 

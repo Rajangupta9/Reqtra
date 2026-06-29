@@ -45,10 +45,10 @@ const RenameDialog = ({ open, currentName, onClose, onConfirm }) => {
             PaperProps={{
                 sx: {
                     position: 'absolute',
-                    top: '15%',          // ✅ moves dialog slightly down from top
+                    top: '15%',
                     margin: 0,
-                    borderRadius: 2,
-                    minWidth: 400,       // optional width
+                    borderRadius: '10px',
+                    minWidth: 400,
                 },
             }}
         >
@@ -57,10 +57,12 @@ const RenameDialog = ({ open, currentName, onClose, onConfirm }) => {
                 <TextField
                     autoFocus
                     fullWidth
+                    size="small"
                     label="New Name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     margin="dense"
+                    onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
                 />
             </DialogContent>
             <DialogActions>

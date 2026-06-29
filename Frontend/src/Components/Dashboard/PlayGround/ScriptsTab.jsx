@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
-  Card,
-  CardContent,
-  Chip,
   Button,
   Tabs,
   Tab,
   Menu,
   MenuItem,
-  alpha,
 } from '@mui/material';
-import { Code, Restore, ExpandMore } from '@mui/icons-material';
+import { Restore, ExpandMore } from '@mui/icons-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { EditorView } from '@codemirror/view';
@@ -82,72 +77,69 @@ const ScriptsTab = () => {
 
   return (
     <Box>
-      <Typography variant="h6" sx={{ fontSize: '16px', fontWeight: 600 }}>
-        Scripts
-      </Typography>
+      <Box
+        sx={{
+          border: (t) => `1px solid ${t.palette.divider}`,
+          borderRadius: '8px',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: (t) => `1px solid ${t.palette.divider}`,
+            px: 1,
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            sx={{
+              minHeight: 38,
+              '& .MuiTab-root': { minHeight: 38, py: 0, fontSize: '13px' },
+            }}
+          >
+            <Tab label="Pre-request" disableRipple sx={{ textTransform: 'none', fontWeight: 500 }} />
+            <Tab label="Post-request" disableRipple sx={{ textTransform: 'none', fontWeight: 500 }} />
+          </Tabs>
 
-      {/* <Card elevation={0} sx={{ mb: 2 }}>
-        <CardContent sx={{ pb: '16px !important' }}>
-          <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-            <Chip icon={<Code />} label="JavaScript" size="small" color="primary" variant="outlined" />
-            <Chip label="Postman API Available" size="small" color="info" variant="outlined" />
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Write or insert prebuilt JavaScript scripts to execute before or after requests.
-          </Typography>
-        </CardContent>
-      </Card> */}
-
-      <Box sx={{ border: (t) => `1px solid ${t.palette.divider}`, borderRadius: 2, mt: 2 }}>
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label="Pre-request Script" sx={{ textTransform: 'none', fontWeight: 500 }} />
-          <Tab label="Post-request Script" sx={{ textTransform: 'none', fontWeight: 500 }} />
-        </Tabs>
-
-        {/* --- Pre-request --- */}
-        <TabPanel value={activeTab} index={0}>
-          <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', gap: 0.75 }}>
             <Button
               variant="outlined"
-              endIcon={<ExpandMore />}
+              endIcon={<ExpandMore sx={{ fontSize: '14px !important' }} />}
               size="small"
               onClick={handleOpenMenu}
+              sx={{ fontSize: '11px', height: 26, px: 1.25 }}
             >
-              Insert Example
+              Examples
             </Button>
-            <Button startIcon={<Restore />} size="small" onClick={() => setPreRequestValue('')}>
+            <Button
+              startIcon={<Restore sx={{ fontSize: '14px !important' }} />}
+              size="small"
+              onClick={() => activeTab === 0 ? setPreRequestValue('') : setTestValue('')}
+              sx={{ fontSize: '11px', height: 26, px: 1.25 }}
+            >
               Clear
             </Button>
           </Box>
+        </Box>
 
+        <TabPanel value={activeTab} index={0}>
           <CodeMirror
             value={preRequestValue}
-            height="450px"
+            height="360px"
             extensions={[javascript({ jsx: true }), EditorView.lineWrapping]}
             theme={mode === "dark" ? vscodeDark : vscodeLight}
             onChange={(v) => setPreRequestValue(v)}
           />
         </TabPanel>
 
-        {/* --- Post-request --- */}
         <TabPanel value={activeTab} index={1}>
-          <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between' }}>
-            <Button
-              variant="outlined"
-              endIcon={<ExpandMore />}
-              size="small"
-              onClick={handleOpenMenu}
-            >
-              Insert Example
-            </Button>
-            <Button startIcon={<Restore />} size="small" onClick={() => setTestValue('')}>
-              Clear
-            </Button>
-          </Box>
-
           <CodeMirror
             value={testValue}
-            height="450px"
+            height="360px"
             extensions={[javascript({ jsx: true }), EditorView.lineWrapping]}
             theme={mode === "dark" ? vscodeDark : vscodeLight}
             onChange={(v) => setTestValue(v)}

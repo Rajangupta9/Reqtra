@@ -146,9 +146,18 @@ export default function FakerTextField({
         sx={{
           px: 1,
           py: 0.5,
-          borderRadius: "4px",
+          borderRadius: '4px',
+          fontSize: '12px',
+          transition: 'background-color 0.1s ease, box-shadow 0.1s ease',
+          '& input::placeholder': { opacity: 0.45 },
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          },
+          '&.Mui-focused': {
+            backgroundColor: 'action.hover',
+            boxShadow: 'inset 0 0 0 1.5px rgba(79,142,247,0.45)',
+          },
         }}
-
       />
 
       <Popper

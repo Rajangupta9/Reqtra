@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import {
     Box,
-    Typography,
     Tabs,
     Tab,
     Button,
@@ -164,45 +163,42 @@ const BodyTab = () => {
         autocompletion({ override: [fakerCompletion] }),
     ];
 
-    const tabStyles = {
-        textTransform: 'none',
-        fontWeight: 500,
-    };
-
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 0 }}>
-                    Request Body
-                </Typography>
+            {/* Body type selector */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Tabs
+                    value={bodyType || 'raw'}
+                    onChange={handleBodyTypeChange}
+                    sx={{
+                        minHeight: 32,
+                        '& .MuiTab-root': { minHeight: 32, py: 0, px: 1.5, fontSize: '12px' },
+                        '& .MuiTabs-indicator': { height: 2 },
+                    }}
+                >
+                    <Tab label="Raw" value="raw" disableRipple />
+                    <Tab label="Form Data" value="formdata" disableRipple />
+                    <Tab label="URL Encoded" value="urlencoded" disableRipple />
+                </Tabs>
+
                 {bodyType === 'raw' && (
                     <Button
                         variant="outlined"
                         size="small"
                         onClick={handleBeautify}
-                        sx={{ textTransform: "none", borderRadius: 2 }}
+                        sx={{ fontSize: '11px', height: 26, px: 1.5 }}
                     >
-                        Beautify JSON
+                        Beautify
                     </Button>
                 )}
             </Box>
 
-            <Tabs
-                value={bodyType || 'raw'}
-                onChange={handleBodyTypeChange}
-                sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}
-            >
-                <Tab label="Raw" value="raw" sx={tabStyles} />
-                <Tab label="Form Data" value="formdata" sx={tabStyles} />
-                <Tab label="URL Encoded" value="urlencoded" sx={tabStyles} />
-            </Tabs>
-
             {bodyType === 'raw' && (
-                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '6px', overflow: 'hidden' }}>
                     <CodeMirror
                         value={localRawBody}
                         onChange={setLocalRawBody}
-                        height="350px"
+                        height="320px"
                         extensions={codeMirrorExtensions}
                         theme={mode === "dark" ? vscodeDark : vscodeLight}
                     />
